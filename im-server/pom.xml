@@ -19,6 +19,11 @@
             <version>3.0.0</version>
         </dependency>
         <dependency>
+            <groupId>com.bx</groupId>
+            <artifactId>im-platform</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+        <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
             <version>4.1.42.Final</version>

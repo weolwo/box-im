@@ -5,7 +5,6 @@ import com.bx.imcommon.util.ThreadPoolExecutorFactory;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.ParameterizedType;
@@ -26,7 +25,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Component
-public class RedisMQPullTask implements CommandLineRunner {
+public class RedisMQPullTask  {
 
     private static final ScheduledThreadPoolExecutor EXECUTOR = ThreadPoolExecutorFactory.getThreadPoolExecutor();
 
@@ -36,7 +35,6 @@ public class RedisMQPullTask implements CommandLineRunner {
     @Autowired
     private RedisMQTemplate redisMQTemplate;
 
-    @Override
     public void run(String... args) {
         consumers.forEach((consumer -> {
             // 注解参数
@@ -71,6 +69,7 @@ public class RedisMQPullTask implements CommandLineRunner {
                     } catch (Exception e) {
                         log.error("数据消费异常,队列:{}", queue, e);
                         // 出现异常，10s后再重新尝试消费
+                        //TODO 可能死循环，并且导致消息丢失
                         EXECUTOR.schedule(this, 10, TimeUnit.SECONDS);
                         return;
                     }
@@ -109,8 +108,9 @@ public class RedisMQPullTask implements CommandLineRunner {
     }
 
     @PreDestroy
-    public void destory() {
+    public void destroy() {
         log.info("消费线程停止...");
         ThreadPoolExecutorFactory.shutDown();
+
     }
 }

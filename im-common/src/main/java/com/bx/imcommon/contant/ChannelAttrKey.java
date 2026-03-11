@@ -1,4 +1,4 @@
-package com.bx.imserver.constant;
+package com.bx.imcommon.contant;
 
 public final class ChannelAttrKey {
 

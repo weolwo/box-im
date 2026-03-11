@@ -2,6 +2,7 @@ package com.bx.imserver.netty.tcp;
 
 import com.bx.imserver.netty.IMChannelHandler;
 import com.bx.imserver.netty.IMServer;
+import com.bx.imserver.netty.IMServerGroup;
 import com.bx.imserver.netty.tcp.endecode.MessageProtocolDecoder;
 import com.bx.imserver.netty.tcp.endecode.MessageProtocolEncoder;
 import io.netty.bootstrap.ServerBootstrap;
@@ -10,6 +11,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -34,6 +36,8 @@ public class TcpSocketServer implements IMServer {
 
     private EventLoopGroup bossGroup;
     private EventLoopGroup workGroup;
+    @Autowired
+    private  IMServerGroup imServerGroup;
 
     @Override
     public boolean isReady() {
@@ -43,7 +47,7 @@ public class TcpSocketServer implements IMServer {
     @Override
     public void start() {
         ServerBootstrap bootstrap = new ServerBootstrap();
-        bossGroup = new NioEventLoopGroup();
+        bossGroup = new NioEventLoopGroup(1);
         workGroup = new NioEventLoopGroup();
         // 设置为主从线程模型
         bootstrap.group(bossGroup, workGroup)
@@ -65,7 +69,7 @@ public class TcpSocketServer implements IMServer {
                 // bootstrap 还可以设置TCP参数，根据需要可以分别设置主线程池和从线程池参数，来优化服务端性能。
                 // 其中主线程池使用option方法来设置，从线程池使用childOption方法设置。
                 // backlog表示主线程池中在套接口排队的最大数量，队列由未连接队列（三次握手未完成的）和已连接队列
-                .option(ChannelOption.SO_BACKLOG, 5)
+               // .option(ChannelOption.SO_BACKLOG, 5)
                 // 表示连接保活，相当于心跳机制，默认为7200s
                 .childOption(ChannelOption.SO_KEEPALIVE, true);
 
@@ -74,6 +78,7 @@ public class TcpSocketServer implements IMServer {
             Channel channel = bootstrap.bind(port).sync().channel();
             // 就绪标志
             this.ready = true;
+            imServerGroup.getCountDownLatch().countDown();
             log.info("tcp server 初始化完成,端口：{}", port);
             // 等待服务端口关闭
             //channel.closeFuture().sync();

@@ -24,9 +24,16 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * @author: Blue
- * @date: 2024-07-15
- * @version: 1.0
+ Lombok 的 @RequiredArgsConstructor 注解，它配合 Spring 的 构造器注入（Constructor Injection） 机制实现了自动注入。
+
+ 现在 Spring 官方其实更推荐这种写法，而不是直接在字段上加 @Autowired
+ 当你标注了 @RequiredArgsConstructor 时，Lombok 会在编译期自动为你的类生成一个包含所有 private final 字段的构造函数。
+ // Lombok 自动生成的全参构造函数
+ public GroupUnbanConsumerTask(IMClient imClient, GroupMessageService groupMessageService, GroupMemberService groupMemberService) {
+     this.imClient = imClient;
+     this.groupMessageService = groupMessageService;
+     this.groupMemberService = groupMemberService;
+ }
  */
 @Slf4j
 @Component

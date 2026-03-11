@@ -1,9 +1,16 @@
+
 spring:
   profiles:
     active: dev
   application:
     name: im-server
-
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
 websocket:
   enable: true
   port: 8878
@@ -12,6 +19,26 @@ tcpsocket:
   enable: false # 暂时不开启
   port: 8879
 
+
+
+
+
+mybatis-plus:
+  global-config:
+    db-config:
+      id-type: AUTO # ID自增
+  configuration:
+    map-underscore-to-camel-case: true  #开启自动驼峰命名规则
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
 jwt:
   accessToken:
-    secret: MIIBIjANBgkq  # 跟im-platfrom的secret必须一致
+    expireIn: 1800 #半个小时
+    secret: MIIBIjANBgkq
+  refreshToken:
+    expireIn: 604800 #7天
+    secret: IKDiqVmn0VFU
+server:
+  port: 8888
+
+

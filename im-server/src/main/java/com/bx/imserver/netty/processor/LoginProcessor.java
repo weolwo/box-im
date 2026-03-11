@@ -2,6 +2,7 @@ package com.bx.imserver.netty.processor;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.alibaba.fastjson.JSON;
+import com.bx.imcommon.contant.Attributes;
 import com.bx.imcommon.contant.IMConstant;
 import com.bx.imcommon.contant.IMRedisKey;
 import com.bx.imcommon.enums.IMCmdType;
@@ -10,11 +11,9 @@ import com.bx.imcommon.model.IMSendInfo;
 import com.bx.imcommon.model.IMSessionInfo;
 import com.bx.imcommon.mq.RedisMQTemplate;
 import com.bx.imcommon.util.JwtUtil;
-import com.bx.imserver.constant.ChannelAttrKey;
 import com.bx.imserver.netty.IMServerGroup;
 import com.bx.imserver.netty.UserChannelCtxMap;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.util.AttributeKey;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -57,14 +56,11 @@ public class LoginProcessor extends AbstractMessageProcessor<IMLoginInfo> {
         // 绑定用户和channel
         UserChannelCtxMap.addChannelCtx(userId, terminal, ctx);
         // 设置用户id属性
-        AttributeKey<Long> userIdAttr = AttributeKey.valueOf(ChannelAttrKey.USER_ID);
-        ctx.channel().attr(userIdAttr).set(userId);
+        ctx.channel().attr(Attributes.USER_ID).set(userId);
         // 设置用户终端类型
-        AttributeKey<Integer> terminalAttr = AttributeKey.valueOf(ChannelAttrKey.TERMINAL_TYPE);
-        ctx.channel().attr(terminalAttr).set(terminal);
+        ctx.channel().attr(Attributes.TERMINAL_TYPE).set(terminal);
         // 初始化心跳次数
-        AttributeKey<Long> heartBeatAttr = AttributeKey.valueOf(ChannelAttrKey.HEARTBEAT_TIMES);
-        ctx.channel().attr(heartBeatAttr).set(0L);
+        ctx.channel().attr(Attributes.HEARTBEAT_TIMES).set(0L);
         // 在redis上记录每个user的channelId，15秒没有心跳，则自动过期
         String key = String.join(":", IMRedisKey.IM_USER_SERVER_ID, userId.toString(), terminal.toString());
         redisMQTemplate.opsForValue().set(key, IMServerGroup.serverId, IMConstant.ONLINE_TIMEOUT_SECOND, TimeUnit.SECONDS);
