@@ -55,7 +55,7 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, Group> implements
     private final GroupMemberService groupMemberService;
     private final GroupMessageMapper groupMessageMapper;
     private final FriendService friendsService;
-    private final IMClient imClient;
+    private final IMClient imClient; //IMClient 将业务指令下发到 Netty 层
     private final RedisTemplate<String, Object> redisTemplate;
 
     @Override
