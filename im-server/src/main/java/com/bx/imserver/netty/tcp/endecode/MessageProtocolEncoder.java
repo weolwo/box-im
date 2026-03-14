@@ -1,6 +1,7 @@
 package com.bx.imserver.netty.tcp.endecode;
 
 import com.bx.imcommon.model.IMSendInfo;
+import com.bx.imserver.util.JsonUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -12,8 +13,7 @@ public class MessageProtocolEncoder extends MessageToByteEncoder<IMSendInfo> {
 
     @Override
     protected void encode(ChannelHandlerContext channelHandlerContext, IMSendInfo sendInfo, ByteBuf byteBuf) throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
-        String content = objectMapper.writeValueAsString(sendInfo);
+        String content = JsonUtils.getMapper().writeValueAsString(sendInfo);
         byte[] bytes = content.getBytes(StandardCharsets.UTF_8);
         // 写入长度
         byteBuf.writeLong(bytes.length);

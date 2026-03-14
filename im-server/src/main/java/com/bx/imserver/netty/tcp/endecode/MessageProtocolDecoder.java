@@ -1,6 +1,7 @@
 package com.bx.imserver.netty.tcp.endecode;
 
 import com.bx.imcommon.model.IMSendInfo;
+import com.bx.imserver.util.JsonUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -39,8 +40,7 @@ public class MessageProtocolDecoder extends ReplayingDecoder {
         // 转成IMSendInfo
         ByteBuf contentBuf = byteBuf.readBytes((int) length);
         String content = contentBuf.toString(CharsetUtil.UTF_8);
-        ObjectMapper objectMapper = new ObjectMapper();
-        IMSendInfo sendInfo = objectMapper.readValue(content, IMSendInfo.class);
+        IMSendInfo sendInfo = JsonUtils.getMapper().readValue(content, IMSendInfo.class);
         list.add(sendInfo);
     }
 }
