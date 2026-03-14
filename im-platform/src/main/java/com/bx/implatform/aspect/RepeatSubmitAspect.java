@@ -41,19 +41,17 @@ public class RepeatSubmitAspect {
     @Before("@annotation(repeatSubmit)")
     public void doBefore(JoinPoint point, RepeatSubmit repeatSubmit) throws Throwable {
         // 如果注解不为0 则使用注解数值
-        long interval = repeatSubmit.timeUnit().toMillis(repeatSubmit.interval());
-        HttpServletRequest request =
-            ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
+        HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
         String url = request.getRequestURL().toString();
         Long userId = SessionContext.getSession().getUserId();
         String reqParams = argsArrayToString(point.getArgs());
         String md5 = SecureUtil.md5(StrUtil.join(":", userId, url, reqParams));
         // 唯一标识
         String key = String.join(":",RedisKey.IM_REPEAT_SUBMIT,md5) ;
-        if(redisTemplate.hasKey(key)){
+        Boolean isSuccess = redisTemplate.opsForValue().setIfAbsent(key, "1", repeatSubmit.interval(), repeatSubmit.timeUnit());
+        if(!Boolean.TRUE.equals(isSuccess)){
             throw new GlobalException(repeatSubmit.message());
         }
-        redisTemplate.opsForValue().set(key,1,repeatSubmit.interval(),repeatSubmit.timeUnit());
     }
 
 
