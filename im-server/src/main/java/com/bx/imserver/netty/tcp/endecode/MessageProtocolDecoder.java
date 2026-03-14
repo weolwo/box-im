@@ -4,11 +4,13 @@ import com.bx.imcommon.model.IMSendInfo;
 import com.bx.imserver.util.JsonUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufInputStream;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ReplayingDecoder;
 import io.netty.util.CharsetUtil;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -31,16 +33,34 @@ import java.util.List;
 public class MessageProtocolDecoder extends ReplayingDecoder {
 
     @Override
-    protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) throws Exception {
+    protected void decode(ChannelHandlerContext ctx, ByteBuf byteBuf, List<Object> out) throws Exception {
         if (byteBuf.readableBytes() < 4) {
             return;
         }
-        // 获取到包的长度
-        long length = byteBuf.readLong();
-        // 转成IMSendInfo
-        ByteBuf contentBuf = byteBuf.readBytes((int) length);
-        String content = contentBuf.toString(CharsetUtil.UTF_8);
-        IMSendInfo sendInfo = JsonUtils.getMapper().readValue(content, IMSendInfo.class);
-        list.add(sendInfo);
+
+        // 获取包体的真实长度
+        int length = byteBuf.readInt();
+
+        // 如果读到的长度是非法的（比如被恶意攻击发了负数，或者超大包），直接丢弃或断开连接
+        if (length <= 0 || length > 1024 * 1024 * 10) { // 假设最大限制 10MB
+            log.warn("收到非法的数据包长度: {}", length);
+            ctx.close();
+            return;
+        }
+
+        // 2. 性能巅峰：使用 ByteBufInputStream 包装
+        // 传入 length 后，它会自动在内部限制最多只读 length 个字节，并推动 byteBuf 的 readerIndex
+        try (ByteBufInputStream inputStream = new ByteBufInputStream(byteBuf, length)) {
+            // 3. 让单例的 Jackson 直接怼着 Netty 的底层内存吸数据！
+            // 全程没有 new byte[]，也没有 new String()，干净利落！
+            IMSendInfo sendInfo = JsonUtils.getMapper().readValue((InputStream) inputStream, IMSendInfo.class);
+            out.add(sendInfo);
+
+        } catch (Exception e) {
+            // 捕获反序列化异常，防止脏数据把整个 Netty 线程搞崩溃
+            log.error("JSON 反序列化失败，数据格式错误", e);
+            // 通常解析失败意味着协议被破坏，建议直接关闭连接
+            ctx.close();
+        }
     }
 }
