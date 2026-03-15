@@ -14,7 +14,7 @@ public abstract class AbstractPullMessageTask<T> extends RedisMQConsumer<T> {
 
     @Override
     public String generateKey() {
-        return String.join(":",  super.generateKey(), IMServerGroup.serverId + "");
+        return String.join(":",  super.generateKey(), IMServerGroup.getServerId() + "");
     }
 
     @Override

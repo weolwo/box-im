@@ -45,7 +45,6 @@ public class PrivateMessageServiceImpl extends ServiceImpl<PrivateMessageMapper,
     private final FriendService friendService;
     private final IMClient imClient;
     private final SensitiveFilterUtil sensitiveFilterUtil;
-    private static final ScheduledThreadPoolExecutor EXECUTOR = ThreadPoolExecutorFactory.getThreadPoolExecutor();
 
     @Override
     public PrivateMessageVO sendMessage(PrivateMessageDTO dto) {

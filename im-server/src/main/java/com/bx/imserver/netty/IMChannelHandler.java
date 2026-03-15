@@ -12,7 +12,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
-import io.netty.util.AttributeKey;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -90,8 +89,8 @@ public class IMChannelHandler extends SimpleChannelInboundHandler<IMSendInfo> {
             UserChannelCtxMap.removeChannelCtx(userId, terminal);
             // 用户下线
             RedisMQTemplate redisTemplate = SpringContextHolder.getBean(RedisMQTemplate.class);
-            String key = String.join(":", IMRedisKey.IM_USER_SERVER_ID, userId.toString(), terminal.toString());
-            redisTemplate.delete(key);
+            String key = String.join(":", IMRedisKey.IM_USER_SERVER_SESSION,String.valueOf(IMServerGroup.getServerId()), userId.toString());
+            redisTemplate.opsForHash().delete(key,userId.toString(),terminal.toString());
             log.info("断开连接,userId:{},终端类型:{},{}", userId, terminal, ctx.channel().id().asLongText());
         }
     }

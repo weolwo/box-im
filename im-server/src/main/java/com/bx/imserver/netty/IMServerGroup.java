@@ -7,6 +7,7 @@ import com.bx.imserver.util.SpringContextHolder;
 import jakarta.annotation.PreDestroy;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -21,7 +22,9 @@ import java.util.concurrent.TimeUnit;
 @AllArgsConstructor
 public class IMServerGroup implements CommandLineRunner {
 
-    public static volatile long serverId = 0;
+    @Getter
+    @Setter
+    public  static int serverId = 0;
 
     private final RedisMQTemplate redisMQTemplate;
 
@@ -66,8 +69,8 @@ public class IMServerGroup implements CommandLineRunner {
         }
         //先删除redis中的服务id,让其他服务知道我下线了
         // 3. 主动释放 serverId 锁
-        redisMQTemplate.delete(IMRedisKey.IM_MAX_SERVER_ID + serverId);
-        log.info(">>> serverId {} 已释放", serverId);
+        redisMQTemplate.delete(IMRedisKey.IM_MAX_SERVER_ID + getServerId());
+        log.info(">>> serverId {} 已释放", getServerId());
 
     }
 
@@ -78,8 +81,8 @@ public class IMServerGroup implements CommandLineRunner {
             String redisKey = IMRedisKey.IM_MAX_SERVER_ID + i;
             Boolean success = redisMQTemplate.opsForValue().setIfAbsent(IMRedisKey.IM_MAX_SERVER_ID + i, "ALIVE", 60, TimeUnit.SECONDS);
             if (Boolean.TRUE.equals(success)) {
-                serverId = i;
-                log.info("抢占 serverId 成功: {}", serverId);
+                setServerId(i);
+                log.info("抢占 serverId 成功: {}", getServerId());
                 // 开启一个定时任务，每 30 秒续租一次这个 key
                 startHeartbeatTask(redisKey);
                 return;

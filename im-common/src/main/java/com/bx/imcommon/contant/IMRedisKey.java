@@ -10,7 +10,7 @@ public final class IMRedisKey {
     /**
      * 用户ID所连接的IM-server的ID
      */
-    public static final String  IM_USER_SERVER_ID = "im:user:server_id";
+    public static final String IM_USER_SERVER_SESSION = "im:user:server_session";
     /**
      * 系统消息队列
      */

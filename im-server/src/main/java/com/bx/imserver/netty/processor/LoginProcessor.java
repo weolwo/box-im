@@ -62,8 +62,9 @@ public class LoginProcessor extends AbstractMessageProcessor<IMLoginInfo> {
         // 初始化心跳次数
         ctx.channel().attr(Attributes.HEARTBEAT_TIMES).set(0L);
         // 在redis上记录每个user的channelId，15秒没有心跳，则自动过期
-        String key = String.join(":", IMRedisKey.IM_USER_SERVER_ID, userId.toString(), terminal.toString());
-        redisMQTemplate.opsForValue().set(key, IMServerGroup.serverId, IMConstant.ONLINE_TIMEOUT_SECOND, TimeUnit.SECONDS);
+        String key = String.join(":", IMRedisKey.IM_USER_SERVER_SESSION, userId.toString());
+        redisMQTemplate.opsForHash().put(key, terminal.toString(), IMServerGroup.getServerId());
+        redisMQTemplate.expire(key,IMConstant.ONLINE_TIMEOUT_SECOND, TimeUnit.SECONDS);
         // 响应ws
         IMSendInfo<Object> sendInfo = new IMSendInfo<>();
         sendInfo.setCmd(IMCmdType.LOGIN.code());

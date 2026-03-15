@@ -36,7 +36,7 @@ public class HeartbeatProcessor extends AbstractMessageProcessor<IMHeartbeatInfo
             // 每心跳10次，用户在线状态续一次命
             Long userId = ctx.channel().attr(Attributes.USER_ID).get();
             Integer terminal = ctx.channel().attr(Attributes.TERMINAL_TYPE).get();
-            String key = String.join(":", IMRedisKey.IM_USER_SERVER_ID, userId.toString(), terminal.toString());
+            String key = String.join(":", IMRedisKey.IM_USER_SERVER_SESSION, userId.toString(), terminal.toString());
             redisMQTemplate.expire(key, IMConstant.ONLINE_TIMEOUT_SECOND, TimeUnit.SECONDS);
         }
         Long userId = ctx.channel().attr(Attributes.USER_ID).get();
