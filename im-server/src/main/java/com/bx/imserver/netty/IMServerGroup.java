@@ -22,16 +22,17 @@ import java.util.concurrent.TimeUnit;
 @AllArgsConstructor
 public class IMServerGroup implements CommandLineRunner {
 
-    @Getter
+
     @Setter
-    public  static int serverId = 0;
+    @Getter
+    private static int serverId;
 
     private final RedisMQTemplate redisMQTemplate;
 
     private final List<IMServer> imServers;
 
     @Getter
-    private final CountDownLatch countDownLatch = new CountDownLatch(2);
+    private static volatile CountDownLatch countDownLatch = null;
 
 
     /***
@@ -46,7 +47,15 @@ public class IMServerGroup implements CommandLineRunner {
     public void run(String... args) throws InterruptedException {
         //引入状态管理
         // 初始化SERVER_ID
-        initServerId();
+        if (countDownLatch == null) {
+            synchronized (this) {
+                if (countDownLatch == null) {
+                    countDownLatch = new CountDownLatch(imServers.size());
+                }
+            }
+        }
+        setServerId(initServerId());
+        log.info("服务器id {}",getServerId());
         // 启动服务
         for (IMServer imServer : imServers) {
             imServer.start();
@@ -74,18 +83,17 @@ public class IMServerGroup implements CommandLineRunner {
 
     }
 
-    private void initServerId() {
+    private int initServerId() {
 
         for (int i = 1; i <= 10; i++) { // 假设集群最大1000台
             // 尝试锁定一个 ID，有效期 60 秒（配合心跳续租）
             String redisKey = IMRedisKey.IM_MAX_SERVER_ID + i;
             Boolean success = redisMQTemplate.opsForValue().setIfAbsent(IMRedisKey.IM_MAX_SERVER_ID + i, "ALIVE", 60, TimeUnit.SECONDS);
             if (Boolean.TRUE.equals(success)) {
-                setServerId(i);
-                log.info("抢占 serverId 成功: {}", getServerId());
+                log.info("抢占 serverId 成功: {}", i);
                 // 开启一个定时任务，每 30 秒续租一次这个 key
                 startHeartbeatTask(redisKey);
-                return;
+                return i;
             }
         }
         throw new RuntimeException("无可用 serverId，集群规模已达上限");

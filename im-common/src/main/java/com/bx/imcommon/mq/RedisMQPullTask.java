@@ -1,5 +1,6 @@
 package com.bx.imcommon.mq;
 
+import com.bx.imcommon.contant.IMRedisKey;
 import com.bx.imcommon.util.JsonUtils;
 import com.bx.imcommon.util.ThreadPoolExecutorFactory;
 import com.fasterxml.jackson.databind.JavaType;
@@ -10,7 +11,10 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -54,7 +58,7 @@ public class RedisMQPullTask  {
                             // 拉取一个批次的数据
                             List<Object> objects = pullBatch(key, batchSize);
                             for (Object obj : objects) {
-                                if (obj instanceof Map<?,?>) {
+                                if (obj != null) {
                                     // 3. 终极转换：使用 Jackson 的 convertValue 完美平替 Fastjson 的 toJavaObject
                                     Object convertedData = JsonUtils.getMapper().convertValue(obj, javaType);
                                     consumer.onMessage(convertedData);

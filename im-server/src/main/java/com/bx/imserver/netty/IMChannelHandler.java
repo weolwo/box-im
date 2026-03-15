@@ -89,8 +89,8 @@ public class IMChannelHandler extends SimpleChannelInboundHandler<IMSendInfo> {
             UserChannelCtxMap.removeChannelCtx(userId, terminal);
             // 用户下线
             RedisMQTemplate redisTemplate = SpringContextHolder.getBean(RedisMQTemplate.class);
-            String key = String.join(":", IMRedisKey.IM_USER_SERVER_SESSION,String.valueOf(IMServerGroup.getServerId()), userId.toString());
-            redisTemplate.opsForHash().delete(key,userId.toString(),terminal.toString());
+            String key = String.join(":", IMRedisKey.IM_USER_SERVER_SESSION, userId.toString());
+            redisTemplate.opsForHash().delete(key,terminal.toString());
             log.info("断开连接,userId:{},终端类型:{},{}", userId, terminal, ctx.channel().id().asLongText());
         }
     }
