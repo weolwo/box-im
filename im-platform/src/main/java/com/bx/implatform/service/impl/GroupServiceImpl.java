@@ -2,7 +2,6 @@ package com.bx.implatform.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -10,6 +9,7 @@ import com.bx.imclient.IMClient;
 import com.bx.imcommon.model.IMGroupMessage;
 import com.bx.imcommon.model.IMUserInfo;
 import com.bx.imcommon.util.CommaTextUtils;
+import com.bx.imcommon.util.JsonUtils;
 import com.bx.implatform.annotation.RedisLock;
 import com.bx.implatform.contant.Constant;
 import com.bx.implatform.contant.RedisKey;
@@ -372,7 +372,7 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, Group> implements
     private void sendAddGroupMessage(GroupVO group, List<Long> recvIds, Boolean sendToSelf) {
         UserSession session = SessionContext.getSession();
         GroupMessageVO msgInfo = new GroupMessageVO();
-        msgInfo.setContent(JSON.toJSONString(group));
+        msgInfo.setContent(JsonUtils.toJson(group));
         msgInfo.setType(MessageType.GROUP_NEW.code());
         msgInfo.setSendTime(new Date());
         msgInfo.setGroupId(group.getId());

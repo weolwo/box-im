@@ -12,8 +12,8 @@ import java.io.IOException;
 
 @Component
 @ServletComponentScan
-@WebFilter(urlPatterns = "/*", filterName = "cacheFilter")
-public class CacheFilter implements Filter {
+@WebFilter(urlPatterns = "/*")
+public class CachableFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) {

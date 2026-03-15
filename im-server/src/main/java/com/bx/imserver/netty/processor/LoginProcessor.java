@@ -1,7 +1,6 @@
 package com.bx.imserver.netty.processor;
 
 import cn.hutool.core.bean.BeanUtil;
-import com.alibaba.fastjson.JSON;
 import com.bx.imcommon.contant.Attributes;
 import com.bx.imcommon.contant.IMConstant;
 import com.bx.imcommon.contant.IMRedisKey;
@@ -10,6 +9,7 @@ import com.bx.imcommon.model.IMLoginInfo;
 import com.bx.imcommon.model.IMSendInfo;
 import com.bx.imcommon.model.IMSessionInfo;
 import com.bx.imcommon.mq.RedisMQTemplate;
+import com.bx.imcommon.util.JsonUtils;
 import com.bx.imcommon.util.JwtUtil;
 import com.bx.imserver.netty.IMServerGroup;
 import com.bx.imserver.netty.UserChannelCtxMap;
@@ -40,7 +40,7 @@ public class LoginProcessor extends AbstractMessageProcessor<IMLoginInfo> {
             return;
         }
         String strInfo = JwtUtil.getInfo(loginInfo.getAccessToken());
-        IMSessionInfo sessionInfo = JSON.parseObject(strInfo, IMSessionInfo.class);
+        IMSessionInfo sessionInfo = JsonUtils.parseObject(strInfo, IMSessionInfo.class);
         Long userId = sessionInfo.getUserId();
         Integer terminal = sessionInfo.getTerminal();
         log.info("用户登录，userId:{}", userId);

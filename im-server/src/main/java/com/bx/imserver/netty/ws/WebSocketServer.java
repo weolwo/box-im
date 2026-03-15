@@ -5,6 +5,7 @@ import com.bx.imserver.netty.IMServer;
 import com.bx.imserver.netty.IMServerGroup;
 import com.bx.imserver.netty.ws.endecode.MessageProtocolDecoder;
 import com.bx.imserver.netty.ws.endecode.MessageProtocolEncoder;
+import com.bx.imserver.util.SpringContextHolder;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -15,7 +16,6 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -40,8 +40,6 @@ public class WebSocketServer implements IMServer {
 
     private EventLoopGroup bossGroup;
     private EventLoopGroup workGroup;
-    @Autowired
-    private IMServerGroup imServerGroup;
 
     @Override
     public boolean isReady() {
@@ -86,7 +84,7 @@ public class WebSocketServer implements IMServer {
             bootstrap.bind(port).sync().channel();
             // 就绪标志
             this.ready = true;
-            imServerGroup.getCountDownLatch().countDown();
+            SpringContextHolder.getBean(IMServerGroup.class).getCountDownLatch().countDown();
             log.info("websocket server 初始化完成,端口：{}", port);
             // 等待服务端口关闭
             //channel.closeFuture().sync();

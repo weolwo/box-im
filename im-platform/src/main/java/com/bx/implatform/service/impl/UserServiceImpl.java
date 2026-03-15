@@ -1,15 +1,17 @@
 package com.bx.implatform.service.impl;
 
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.bx.imclient.IMClient;
 import com.bx.imcommon.enums.IMTerminalType;
+import com.bx.imcommon.util.JsonUtils;
 import com.bx.imcommon.util.JwtUtil;
+import com.bx.implatform.annotation.RedisLock;
 import com.bx.implatform.config.props.JwtProperties;
+import com.bx.implatform.contant.RedisKey;
 import com.bx.implatform.dto.LoginDTO;
 import com.bx.implatform.dto.ModifyPwdDTO;
 import com.bx.implatform.dto.RegisterDTO;
@@ -67,7 +69,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         UserSession session = BeanUtils.copyProperties(user, UserSession.class);
         session.setUserId(user.getId());
         session.setTerminal(dto.getTerminal());
-        String strJson = JSON.toJSONString(session);
+        String strJson = JsonUtils.toJson(session);
         String accessToken = JwtUtil.sign(user.getId(), strJson, jwtProperties.getAccessTokenExpireIn(),
             jwtProperties.getAccessTokenSecret());
         String refreshToken = JwtUtil.sign(user.getId(), strJson, jwtProperties.getRefreshTokenExpireIn(),
@@ -108,11 +110,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return vo;
     }
 
+    @RedisLock(prefixKey = RedisKey.IM_LOCK_REGISTER,key = "#dto.getNickName()")
     @Override
     public void register(RegisterDTO dto) {
         // 昵称默认跟用户名保持一致
         if(StrUtil.isEmpty(dto.getNickName())){
-            dto.setUserName(dto.getUserName());
+            dto.setUserName(dto.getNickName());
         }
         User user = this.findUserByUserName(dto.getUserName());
         if(!dto.getUserName().equals(sensitiveFilterUtil.filter(dto.getUserName()))){

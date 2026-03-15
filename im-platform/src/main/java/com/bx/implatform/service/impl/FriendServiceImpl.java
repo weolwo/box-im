@@ -1,6 +1,5 @@
 package com.bx.implatform.service.impl;
 
-import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -10,6 +9,7 @@ import com.bx.imclient.IMClient;
 import com.bx.imcommon.enums.IMTerminalType;
 import com.bx.imcommon.model.IMPrivateMessage;
 import com.bx.imcommon.model.IMUserInfo;
+import com.bx.imcommon.util.JsonUtils;
 import com.bx.implatform.annotation.RedisLock;
 import com.bx.implatform.contant.RedisKey;
 import com.bx.implatform.dto.FriendDndDTO;
@@ -201,7 +201,7 @@ public class FriendServiceImpl extends ServiceImpl<FriendMapper, Friend> impleme
         msgInfo.setSendTime(new Date());
         msgInfo.setType(MessageType.FRIEND_NEW.code());
         FriendVO vo = conver(friend);
-        msgInfo.setContent(JSON.toJSONString(vo));
+        msgInfo.setContent(JsonUtils.toJson(vo));
         IMPrivateMessage<PrivateMessageVO> sendMessage = new IMPrivateMessage<>();
         sendMessage.setSender(new IMUserInfo(friendId, IMTerminalType.UNKNOW.code()));
         sendMessage.setRecvId(userId);

@@ -1,7 +1,7 @@
 package com.bx.implatform.interceptor;
 
 import cn.hutool.core.util.StrUtil;
-import com.alibaba.fastjson.JSON;
+import com.bx.imcommon.util.JsonUtils;
 import com.bx.imcommon.util.JwtUtil;
 import com.bx.implatform.config.props.JwtProperties;
 import com.bx.implatform.enums.ResultCode;
@@ -36,7 +36,7 @@ public class AuthInterceptor implements HandlerInterceptor {
             throw new GlobalException(ResultCode.NO_LOGIN);
         }
         String strJson = JwtUtil.getInfo(token);
-        UserSession userSession = JSON.parseObject(strJson, UserSession.class);
+        UserSession userSession = JsonUtils.parseObject(strJson, UserSession.class);
         // 验证 token
         if (!JwtUtil.checkSign(token, jwtProperties.getAccessTokenSecret())) {
             log.error("token已失效，用户:{}", userSession.getUserName());

@@ -4,7 +4,7 @@ import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
-import com.alibaba.fastjson.JSON;
+import com.bx.imcommon.util.JsonUtils;
 import com.bx.implatform.annotation.RepeatSubmit;
 import com.bx.implatform.contant.RedisKey;
 import com.bx.implatform.exception.GlobalException;
@@ -65,7 +65,7 @@ public class RepeatSubmitAspect {
         }
         for (Object o : paramsArray) {
             if (ObjectUtil.isNotNull(o) && !isFilterObject(o)) {
-                params.add(JSON.toJSONString(o));
+                params.add(JsonUtils.toJson(o));
             }
         }
         return params.toString();

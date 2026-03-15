@@ -1,8 +1,7 @@
 package com.bx.imserver.netty.tcp.endecode;
 
 import com.bx.imcommon.model.IMSendInfo;
-import com.bx.imserver.util.JsonUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.bx.imcommon.util.JsonUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufOutputStream;
 import io.netty.channel.ChannelHandlerContext;
@@ -10,7 +9,7 @@ import io.netty.handler.codec.MessageToByteEncoder;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
+
 @Slf4j
 public class MessageProtocolEncoder extends MessageToByteEncoder<IMSendInfo> {
 

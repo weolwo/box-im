@@ -68,5 +68,9 @@ public final class RedisKey {
      * 分布式锁-清理过期文件
      */
     public static final String IM_LOCK_FILE_TASK =  "im:lock:task:file";
+    /**
+     * 用户注册
+     */
+    public static final String IM_LOCK_REGISTER =  "im:lock:register";
 
 }

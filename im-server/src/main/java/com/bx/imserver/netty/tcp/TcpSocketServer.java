@@ -5,6 +5,7 @@ import com.bx.imserver.netty.IMServer;
 import com.bx.imserver.netty.IMServerGroup;
 import com.bx.imserver.netty.tcp.endecode.MessageProtocolDecoder;
 import com.bx.imserver.netty.tcp.endecode.MessageProtocolEncoder;
+import com.bx.imserver.util.SpringContextHolder;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -36,8 +37,6 @@ public class TcpSocketServer implements IMServer {
 
     private EventLoopGroup bossGroup;
     private EventLoopGroup workGroup;
-    @Autowired
-    private  IMServerGroup imServerGroup;
 
     @Override
     public boolean isReady() {
@@ -78,7 +77,7 @@ public class TcpSocketServer implements IMServer {
             Channel channel = bootstrap.bind(port).sync().channel();
             // 就绪标志
             this.ready = true;
-            imServerGroup.getCountDownLatch().countDown();
+            SpringContextHolder.getBean(IMServerGroup.class).getCountDownLatch().countDown();
             log.info("tcp server 初始化完成,端口：{}", port);
             // 等待服务端口关闭
             //channel.closeFuture().sync();

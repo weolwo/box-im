@@ -1,4 +1,4 @@
-package com.bx.imserver.util;
+package com.bx.imcommon.util;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;

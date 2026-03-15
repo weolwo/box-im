@@ -1,5 +1,6 @@
-package com.bx.implatform.config;
+package com.bx.imcommon.config;
 
+import com.bx.imcommon.mq.RedisMQTemplate;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -33,6 +34,7 @@ public class RedisConfig extends CachingConfigurerSupport {
     @Resource
     private RedisConnectionFactory factory;
 
+
     @Primary
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
@@ -48,7 +50,19 @@ public class RedisConfig extends CachingConfigurerSupport {
         return redisTemplate;
     }
 
-
+    @Bean
+    public RedisMQTemplate redisMQTemplate(RedisConnectionFactory redisConnectionFactory) {
+        RedisMQTemplate redisTemplate = new RedisMQTemplate();
+        redisTemplate.setConnectionFactory(redisConnectionFactory);
+        // 设置值（value）的序列化采用jackson2JsonRedisSerializer
+        redisTemplate.setValueSerializer(jackson2JsonRedisSerializer());
+        redisTemplate.setHashValueSerializer(jackson2JsonRedisSerializer());
+        // 设置键（key）的序列化采用StringRedisSerializer。
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        redisTemplate.afterPropertiesSet();
+        return redisTemplate;
+    }
 
     @Bean
     public CacheManager cacheManager() {

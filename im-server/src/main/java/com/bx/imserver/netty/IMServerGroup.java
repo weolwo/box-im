@@ -3,6 +3,7 @@ package com.bx.imserver.netty;
 import com.bx.imcommon.contant.IMRedisKey;
 import com.bx.imcommon.mq.RedisMQPullTask;
 import com.bx.imcommon.mq.RedisMQTemplate;
+import com.bx.imserver.util.SpringContextHolder;
 import jakarta.annotation.PreDestroy;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,10 +27,8 @@ public class IMServerGroup implements CommandLineRunner {
 
     private final List<IMServer> imServers;
 
-    private final RedisMQPullTask redisMQPullTask;
-
     @Getter
-    private final CountDownLatch countDownLatch = new CountDownLatch(imServers.size());
+    private final CountDownLatch countDownLatch = new CountDownLatch(2);
 
 
     /***
@@ -52,7 +51,7 @@ public class IMServerGroup implements CommandLineRunner {
         // 稍微等一下，确保 Netty 真的 Ready
         countDownLatch.await(30, TimeUnit.SECONDS);
 
-        redisMQPullTask.run();
+        SpringContextHolder.getBean(RedisMQPullTask.class).run();
 
     }
 
@@ -60,7 +59,7 @@ public class IMServerGroup implements CommandLineRunner {
     public void destroy() {
 
         //停止拉取消息
-        redisMQPullTask.destroy();
+        SpringContextHolder.getBean(RedisMQPullTask.class).destroy();
         // 停止服务
         for (IMServer imServer : imServers) {
             imServer.stop();
