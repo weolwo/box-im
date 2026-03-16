@@ -9,12 +9,12 @@ import com.bx.imclient.IMClient;
 import com.bx.imcommon.contant.IMConstant;
 import com.bx.imcommon.model.IMPrivateMessage;
 import com.bx.imcommon.model.IMUserInfo;
-import com.bx.imcommon.util.ThreadPoolExecutorFactory;
 import com.bx.implatform.contant.Constant;
 import com.bx.implatform.dto.PrivateMessageDTO;
 import com.bx.implatform.entity.PrivateMessage;
 import com.bx.implatform.enums.MessageStatus;
 import com.bx.implatform.enums.MessageType;
+import com.bx.implatform.event.PrivateMessageEvent;
 import com.bx.implatform.exception.GlobalException;
 import com.bx.implatform.mapper.PrivateMessageMapper;
 import com.bx.implatform.service.FriendService;
@@ -27,13 +27,13 @@ import com.bx.implatform.vo.PrivateMessageVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -45,6 +45,7 @@ public class PrivateMessageServiceImpl extends ServiceImpl<PrivateMessageMapper,
     private final FriendService friendService;
     private final IMClient imClient;
     private final SensitiveFilterUtil sensitiveFilterUtil;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public PrivateMessageVO sendMessage(PrivateMessageDTO dto) {
@@ -62,7 +63,8 @@ public class PrivateMessageServiceImpl extends ServiceImpl<PrivateMessageMapper,
         if (MessageType.TEXT.code().equals(dto.getType())) {
             msg.setContent(sensitiveFilterUtil.filter(dto.getContent()));
         }
-        this.save(msg);
+        //this.save(msg);
+        eventPublisher.publishEvent(new PrivateMessageEvent(this, msg));
         // 推送消息
         PrivateMessageVO msgInfo = BeanUtils.copyProperties(msg, PrivateMessageVO.class);
         IMPrivateMessage<PrivateMessageVO> sendMessage = new IMPrivateMessage<>();
