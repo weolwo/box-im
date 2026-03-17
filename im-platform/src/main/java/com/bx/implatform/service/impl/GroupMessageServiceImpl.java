@@ -22,6 +22,7 @@ import com.bx.implatform.entity.GroupMember;
 import com.bx.implatform.entity.GroupMessage;
 import com.bx.implatform.enums.MessageStatus;
 import com.bx.implatform.enums.MessageType;
+import com.bx.implatform.event.GroupMessageEvent;
 import com.bx.implatform.exception.GlobalException;
 import com.bx.implatform.mapper.GroupMessageMapper;
 import com.bx.implatform.service.GroupMemberService;
@@ -35,6 +36,7 @@ import com.bx.implatform.vo.GroupMessageVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,6 +55,7 @@ public class GroupMessageServiceImpl extends ServiceImpl<GroupMessageMapper, Gro
     private final RedisTemplate<String, Object> redisTemplate;
     private final IMClient imClient;
     private final SensitiveFilterUtil sensitiveFilterUtil;
+    private final ApplicationEventPublisher eventPublisher;
     private static final ScheduledThreadPoolExecutor EXECUTOR = ThreadPoolExecutorFactory.getThreadPoolExecutor();
 
     @Override
@@ -84,7 +87,8 @@ public class GroupMessageServiceImpl extends ServiceImpl<GroupMessageMapper, Gro
         if (MessageType.TEXT.code().equals(dto.getType())) {
             msg.setContent(sensitiveFilterUtil.filter(dto.getContent()));
         }
-        this.save(msg);
+        //this.save(msg);
+        eventPublisher.publishEvent(new GroupMessageEvent(this,msg));
         // 群发
         GroupMessageVO msgInfo = BeanUtils.copyProperties(msg, GroupMessageVO.class);
         msgInfo.setAtUserIds(dto.getAtUserIds());
